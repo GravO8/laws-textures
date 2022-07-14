@@ -81,13 +81,35 @@ class FeatureMaps(ABC):
                 j += 1
         return maps
         
+    def compute_maps_fully(self, x, input_dim, permutations):
+        n_maps = len(self.vectors)**(input_dim) -1
+        maps   = np.repeat(x[..., np.newaxis], n_maps, axis = input_dim)
+        j      = 0
+        for permutation_set in permutations:
+            for kernel_i in permutation_set:
+                shape  = self.get_kernel_shape(input_dim, 0)
+                kernel = self.vectors[kernel_i[0]].reshape(shape).copy()
+                for dim in range(1,input_dim):
+                    shape   = self.get_kernel_shape(input_dim, dim)
+                    kernel = kernel * self.vectors[kernel_i[0]].reshape(shape)
+                maps[...,j] = signal.fftconvolve(maps[...,j], 
+                                                kernel, 
+                                                mode = "same")
+                print(kernel.shape)
+                j += 1
+        return maps
+        
     def get_features(self, x, window_size: int = 15, preprocess: bool = True, 
-        merge_symmetric: bool = True, compute_energy: bool = True):
+        merge_symmetric: bool = True, compute_energy: bool = True, 
+        compute_fully: bool = False):
         input_dim = x.ndim
         if preprocess:
             x = self.preprocess_input(x, window_size, input_dim)
         permutations = self.generate_kernel_permutations(input_dim)
-        maps = self.compute_maps_separably(x, input_dim, permutations)
+        if compute_fully:
+            maps = self.compute_maps_fully(x, input_dim, permutations)
+        else:
+            maps = self.compute_maps_separably(x, input_dim, permutations)
         if merge_symmetric:
             maps = self.merge_symmetric_maps(maps, permutations)
         if compute_energy:
@@ -132,7 +154,7 @@ def laws_textures(vector_dims: int = 5):
 if __name__ == "__main__":
     laws = laws_textures(vector_dims = 5)
     x = np.zeros((32,32))
-    laws.get_features(x)
+    laws.get_features(x, compute_fully = True)
     
     # maps = GeneralizedFeatureMaps(LAWS_VECTORS[3], 5)
     # maps.get_features(x)
