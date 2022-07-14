@@ -50,12 +50,15 @@ class FeatureMaps(ABC):
             permutations.append( list(set(itertools.permutations(kernel_i, input_dim))) )
         permutations.pop(0) # remove the first non zero sum kernel
         maps = np.repeat(x[..., np.newaxis], n_maps, axis = input_dim)
-        for dim in range(input_dim):
-            shape = self.get_kernel_shape(input_dim, dim)
-            for permutation_set in permutations:
-                for kernel_i in permutation_set:
-                    i = kernel_i[dim]
-                    maps[..., dim] = signal.fftconvolve(maps[..., dim], self.vectors[i].reshape(shape), mode = "same")
+        j = 0
+        for permutation_set in permutations:
+            for kernel_i in permutation_set:
+                for dim in range(input_dim):
+                    shape = self.get_kernel_shape(input_dim, dim)
+                    maps[...,j] = signal.fftconvolve(maps[...,j], 
+                                                    self.vectors[kernel_i[dim]].reshape(shape), 
+                                                    mode = "same")
+                j += 1
         if merge_symmetric:
             i = 0
             j = 0
@@ -109,7 +112,7 @@ def laws_textures(vector_dims: int = 5):
 
 if __name__ == "__main__":
     laws = laws_textures(vector_dims = 5)
-    x = np.zeros((32,32,32))
+    x = np.zeros((32,32))
     laws.get_features(x)
     
     # maps = GeneralizedFeatureMaps(LAWS_VECTORS[3], 5)
