@@ -95,7 +95,6 @@ class FeatureMaps(ABC):
                 maps[...,j] = signal.fftconvolve(maps[...,j], 
                                                 kernel, 
                                                 mode = "same")
-                print(kernel.shape)
                 j += 1
         return maps
         
