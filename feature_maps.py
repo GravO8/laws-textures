@@ -37,7 +37,8 @@ class FeatureMaps(ABC):
     def get_kernel_shape(self, input_dim, dim):
         return tuple([self.vector_dims if i == dim else 1 for i in range(input_dim)])
             
-    def get_features(self, x, window_size: int = 15, preprocess: bool = True, merge_symmetric: bool = True):
+    def get_features(self, x, window_size: int = 15, preprocess: bool = True, 
+        merge_symmetric: bool = True, compute_energy: bool = True):
         input_dim = x.ndim
         if preprocess:
             smooth   = np.ones((window_size,)*input_dim)/(window_size**2)
@@ -52,7 +53,7 @@ class FeatureMaps(ABC):
         for dim in range(input_dim):
             shape = self.get_kernel_shape(input_dim, dim)
             for permutation_set in permutations:
-                for kernel_i in permutation_set: 
+                for kernel_i in permutation_set:
                     i = kernel_i[dim]
                     maps[..., dim] = signal.fftconvolve(maps[..., dim], self.vectors[i].reshape(shape), mode = "same")
         if merge_symmetric:
@@ -66,6 +67,10 @@ class FeatureMaps(ABC):
                 j += 1
             assert j == len(kernels_i)-1
             maps = maps[...,:j]
+        if compute_energy:
+            maps     = np.abs(maps)
+            abs_save = np.ones((window_size,)*input_dim) # absolute save
+            maps     = np.stack([signal.fftconvolve(maps[...,i], abs_save, mode = "valid") for i in range(maps.shape[-1])], axis = -1)
         return maps
         
         
