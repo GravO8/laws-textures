@@ -37,23 +37,24 @@ class FeatureMaps(ABC):
     def get_kernel_shape(self, input_dim, dim):
         return tuple([self.vector_dims if i == dim else 1 for i in range(input_dim)])
             
-    def get_features(self, x, preprocess: bool = True, merge_symmetric: bool = True):
+    def get_features(self, x, window_size: int = 15, preprocess: bool = True, merge_symmetric: bool = True):
         input_dim = x.ndim
-        kernels_i = list(itertools.combinations_with_replacement(range(len(self.vectors)), input_dim))
-        n_maps    = len(self.vectors)**(input_dim) -1
+        if preprocess:
+            smooth   = np.ones((window_size,)*input_dim)/(window_size**2)
+            x        = signal.fftconvolve(x, smooth, mode = "same")
+        kernels_i    = list(itertools.combinations_with_replacement(range(len(self.vectors)), input_dim))
+        n_maps       = len(self.vectors)**(input_dim) -1
         permutations = []
         for kernel_i in kernels_i:
             permutations.append( list(set(itertools.permutations(kernel_i, input_dim))) )
         permutations.pop(0) # remove the first non zero sum kernel
-        # if preprocess:
-            # TODO
         maps = np.repeat(x[..., np.newaxis], n_maps, axis = input_dim)
         for dim in range(input_dim):
             shape = self.get_kernel_shape(input_dim, dim)
             for permutation_set in permutations:
                 for kernel_i in permutation_set: 
                     i = kernel_i[dim]
-                    maps[..., dim] = signal.fftconvolve(maps[..., dim], self.vectors[i].reshape(shape), mode = "same")            
+                    maps[..., dim] = signal.fftconvolve(maps[..., dim], self.vectors[i].reshape(shape), mode = "same")
         if merge_symmetric:
             feature_indexes = []
             i = 0
@@ -96,7 +97,6 @@ class GeneralizedFeatureMaps(FeatureMaps):
             j += 1
         return vectors
 
-        
 
 def laws_textures(vector_dims: int = 5):
     assert vector_dims in LAWS_VECTORS
