@@ -64,7 +64,7 @@ class FeatureMaps(ABC):
             j = 0
             for permutation_set in permutations:
                 n_perm = len(permutation_set)
-                maps[...,j] = maps[..., i:i+n_perm].mean()
+                maps[...,j] = np.mean(maps[..., i:i+n_perm], axis = -1)
                 i += n_perm
                 j += 1
             assert j == len(kernels_i)-1
