@@ -57,7 +57,6 @@ class FeatureMaps(ABC):
                     i = kernel_i[dim]
                     maps[..., dim] = signal.fftconvolve(maps[..., dim], self.vectors[i].reshape(shape), mode = "same")
         if merge_symmetric:
-            feature_indexes = []
             i = 0
             j = 0
             for permutation_set in permutations:
@@ -110,7 +109,7 @@ def laws_textures(vector_dims: int = 5):
 
 if __name__ == "__main__":
     laws = laws_textures(vector_dims = 5)
-    x = np.zeros((32,32))
+    x = np.zeros((32,32,32))
     laws.get_features(x)
     
     # maps = GeneralizedFeatureMaps(LAWS_VECTORS[3], 5)

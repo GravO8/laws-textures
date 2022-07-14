@@ -3,3 +3,5 @@ __pycache__
 laws.m
 *.pdf
 sapo
+dtd
+.ipynb_checkpoints
