@@ -16,7 +16,7 @@ imageG=imfilter(imageG,smooth,'conv','symmetric'); -->
 
 Como na tabela 7.1. de https://courses.cs.washington.edu/courses/cse576/book/ch7.pdf
 
-*The final output is a segmenteO imaqe or classification map. Classification is simple and fast if the texture classes are known a priori. Fither texture energy planes or principal component planes may be used as input to the pixel classifier. Clustering or segmentation algorithms must be used if texture classes are unknown.* - page 144/195
+*The final output is a segmented image or classification map. Classification is simple and fast if the texture classes are known a priori. Fither texture energy planes or principal component planes may be used as input to the pixel classifier. Clustering or segmentation algorithms must be used if texture classes are unknown.* - page 144/195
 
 
 
@@ -26,3 +26,20 @@ Como na tabela 7.1. de https://courses.cs.washington.edu/courses/cse576/book/ch7
  - S3 = [-1, 2,-1]
  
  Perceber como é que eles podem ser combinados sem repetições
+
+
+# Presentation
+
+## What are Laws Textures?
+ - radiomic features
+ - separable filters
+ - generalazible for higher dimensions and larger kernels
+ 
+## Examples of the generated filters
+
+## Why is it useful?
+ - Bar code segmentation
+ - 3D dataset classification
+ 
+## Code on GitHub
+https://github.com/GravO8/laws-textures
