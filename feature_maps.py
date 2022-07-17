@@ -1,5 +1,4 @@
 import numpy as np, itertools
-from abc import ABC
 from scipy import signal
 
 VECTOR_INITIALS = ["L", "E", "S", "W", "R", "O"]
@@ -27,7 +26,7 @@ LAWS_VECTORS = {
         np.array([-1,6,-15,20,-15,6,-1])] # O7
 }
 
-class FeatureMaps(ABC):
+class FeatureMaps:
     def __init__(self, vectors):
         self.vectors = vectors
         self.vector_dims = len(vectors[0])
@@ -54,12 +53,19 @@ class FeatureMaps(ABC):
         return maps
         
     def compute_energy_maps(self, maps, window_size, input_dim):
+        '''
+        sum all the entries in a window of size window_size
+        '''
         maps     = np.abs(maps)
         abs_save = np.ones((window_size,)*input_dim) # absolute save
         maps     = np.stack([signal.fftconvolve(maps[...,i], abs_save, mode = "valid") for i in range(maps.shape[-1])], axis = -1)
         return maps
         
     def generate_kernel_permutations(self, input_dim):
+        '''
+        outputs the combinations (with replacement) that can be obtained from 
+        the vectors, in indexes
+        '''
         kernels_i    = list(itertools.combinations_with_replacement(range(len(self.vectors)), input_dim))
         permutations = []
         for kernel_i in kernels_i:
@@ -68,6 +74,10 @@ class FeatureMaps(ABC):
         return permutations
         
     def compute_maps_separably(self, x, input_dim, permutations):
+        '''
+        computes the feature maps by convolving each vector individually, one 
+        at the time
+        '''
         n_maps = len(self.vectors)**(input_dim) -1
         maps   = np.repeat(x[..., np.newaxis], n_maps, axis = input_dim)
         j      = 0
@@ -82,6 +92,10 @@ class FeatureMaps(ABC):
         return maps
         
     def compute_maps_fully(self, x, input_dim, permutations):
+        '''
+        computes the feature maps by creating the full kernel and convolving it
+        on the input
+        '''
         n_maps = len(self.vectors)**(input_dim) -1
         maps   = np.repeat(x[..., np.newaxis], n_maps, axis = input_dim)
         j      = 0
@@ -91,7 +105,7 @@ class FeatureMaps(ABC):
                 kernel = self.vectors[kernel_i[0]].reshape(shape).copy()
                 for dim in range(1,input_dim):
                     shape   = self.get_kernel_shape(input_dim, dim)
-                    kernel = kernel * self.vectors[kernel_i[0]].reshape(shape)
+                    kernel  = kernel * self.vectors[kernel_i[dim]].reshape(shape)
                 maps[...,j] = signal.fftconvolve(maps[...,j], 
                                                 kernel, 
                                                 mode = "same")
@@ -101,6 +115,19 @@ class FeatureMaps(ABC):
     def get_features(self, x, window_size: int = 15, preprocess: bool = True, 
         merge_symmetric: bool = True, compute_energy: bool = True, 
         compute_fully: bool = False):
+        '''
+        x - the n dimensional input
+        window_size - integer specifying the size of the moving window used to 
+        the smoothing preprocessing and the energy maps computation
+        preprocess - bool that specifies whether the input should be preprocessed
+        merge_symmetric - bool that specifies whether symmetric to average 
+        symmetric maps, i.e. maps obtained using the same vectors
+        compute_energy - bool that specifies whether to compute the energy maps
+        or simply return the feature maps 
+        compute_fully - bool that specifies how the feature maps are obtained,
+        when true the full kernel is computed and then applied to the image;
+        otherwise the individual vectors are applied each dimension at a time
+        '''
         input_dim = x.ndim
         if preprocess:
             x = self.preprocess_input(x, window_size, input_dim)
@@ -118,6 +145,13 @@ class FeatureMaps(ABC):
         
 class GeneralizedFeatureMaps(FeatureMaps):
     def __init__(self, basis_vectors: list, vector_dims: int):
+        '''
+        'basis_vectors': list of numpy vectors that can be combined to create 
+        longer vectors with 'vector_dims' entries. These longer vectors are then
+        as separable filters to generate the image features
+        'vector_dims': integer that specifies the length of the vectors to be 
+        used for the separable filters. Must be an odd number
+        '''
         assert vector_dims > 1
         assert vector_dims % 2 == 1
         for v in basis_vectors:
@@ -126,12 +160,12 @@ class GeneralizedFeatureMaps(FeatureMaps):
         self.vec_counter    = 0
         vectors             = self.generate_vectors(vector_dims)
         super().__init__(vectors)
-        
-    def get_vector_name(self, j):
-        self.vec_counter += 1
-        return f"X{self.vec_counter}-" + str(self.vector_dims)
 
     def generate_vectors(self, vector_dims):
+        '''
+        Convolves the basis vectors with themselves enough times to get the 
+        desired 'vector_dims' length
+        '''
         N            = 1 + (vector_dims - 3) // 2
         j            = 0
         combinations = list(itertools.combinations_with_replacement(range(len(self.basis_vectors)), N))
