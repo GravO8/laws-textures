@@ -51,7 +51,7 @@ For more in depth examples, check the jupyter notebooks:
 - `Laws Textures test` notebook loads the [Describable Textures Dataset (DTD)](https://www.robots.ox.ac.uk/~vgg/data/dtd) and plots the feature maps generated next to their corresponding images. It also trains a pixel wise logistic regression classifier from the images of this dataset to identify line patterns. This classifier is then used to identify bar codes, with reasonable success (specially considering no feature selection or fine tunning was done).
 - `Laws 3D.ipynb` notebook contains a simple 3D classification example. It uses the *NoduleMNIST3D* dataset from [MedMNIST](https://github.com/MedMNIST/MedMNIST). The classifier's features are the mean and standard deviation of each 3D Laws textures. 
 
-![bar code example](bar codes/3.png)
+![bar code example](https://github.com/GravO8/laws-textures/blob/master/bar%20codes/3.png)
 
 ## Context
 
