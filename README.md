@@ -30,7 +30,7 @@ We then apply the kernels to the input and end up with one feature map for each 
 
 The definiton of the Laws textures can be easily generalized. Here are the generalizations achievable with this package:
 
-- Use different *basis vectors*. Why should we limit ourselves to the `L3`,` E3` and` S3` basis vectors? Feed any set of length 3 basis vectors you want to use, to the `GeneralizedFeatureMaps` class, in the `basis_vectors` argument.
+- Use different *basis vectors*. Why should we limit ourselves to the `L3`, `E3` and `S3` basis vectors? Feed any set of length 3 basis vectors you want to use, to the `GeneralizedFeatureMaps` class, in the `basis_vectors` argument.
 - Use kernels of any size. Laws only experimented with kernel sizes of size 3, 5 and 7. With the `vector_dims` argument of the `GeneralizedFeatureMaps` class you can specify any odd kernel size greater than 1. 
 - Get features for inputs of any dimension. The `get_features` always uses kernels of the same size as the input, by combining one vector per dimension.
 
