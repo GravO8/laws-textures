@@ -129,6 +129,10 @@ class FeatureMaps:
         otherwise the individual vectors are applied each dimension at a time
         '''
         input_dim = x.ndim
+        min_dim   = min(x.shape)
+        if window_size > min_dim:
+            print(f"FeatureMaps.get_features: warning, changing the 'windows_size' from {window_size} to the input's dim min ({min_dim})")
+            window_size = min_dim
         if preprocess:
             x = self.preprocess_input(x, window_size, input_dim)
         permutations = self.generate_kernel_permutations(input_dim)
